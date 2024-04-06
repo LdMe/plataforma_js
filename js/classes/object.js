@@ -7,6 +7,10 @@ class Object extends Phaser.GameObjects.Sprite {
     this.scene.add.existing(this);
     this.scene.physics.world.enable(this);
     this.body.setCollideWorldBounds(true);
+    this.body.setBounce(0.2);
+    this.body.setDrag(100, 0);
+    // set pivot to bottom left
+    this.setOrigin(0.5,0);
   }
 
   setDrag(x, y) {
@@ -27,15 +31,26 @@ class Object extends Phaser.GameObjects.Sprite {
 class StaticObject extends Object {
   constructor(scene, x, y, texture) {
     super(scene, x, y, texture);
-    this.body.setImmovable(true);
+    // Setting immovable to true also prevents falling
+    this.body.immovable= true;
+    this.body.setAllowGravity(false);
   }
 }
 
 class MovableObject extends Object {
   constructor(scene, x, y, texture, enableGravity = true) {
     super(scene, x, y, texture);
-    this.body.setGravityY(enableGravity);
-    this.body.setDrag(100, 0);
+    if(enableGravity) {
+      this.body.setAllowGravity(true);
+    }
+    else {
+      this.body.setAllowGravity(false);
+    }
+    
+    
+  }
+  setVelocity(x, y) {
+    this.body.setVelocity(x, y);
   }
 }
 

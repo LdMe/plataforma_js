@@ -5,11 +5,12 @@ class Character extends Phaser.GameObjects.Sprite {
         super(scene, x, y, texture);
         this.texture = texture;
         this.scene = scene;
+        this.score=0;
         this.scene.add.existing(this);
         this.scene.physics.world.enable(this);
-        this.body.setCollideWorldBounds(true);
-        this.scene.physics.add.collider(this, this.scene.platforms);
         this.createAnimations();
+        
+
     }
     createAnimations() {
         this.scene.anims.create({
@@ -51,6 +52,7 @@ class Character extends Phaser.GameObjects.Sprite {
     setScale(x) {
         this.body.setScale(x);
     }
+    
 }
 
 export { Character };

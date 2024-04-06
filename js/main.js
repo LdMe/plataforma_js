@@ -13,79 +13,96 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 300 },
+            gravity: { y: 400 },
             debug: true
         }
     }
 };
 
-const game = new Phaser.Game(config);
-let player,cursors,staticObject,platforms;
+let game = new Phaser.Game(config);
+let player;
+let level=1;
+const maxLevel = 2;
+let ended=false;
+
+
 function preload() {
     // Carga los assets del juego (spritesheets, imágenes, etc.)
     this.load.image('background', 'assets/background.png');
     this.load.spritesheet('player', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
-    this.load.image('floor', 'assets/platform.png');
-    this.load.image('map', 'assets/map.png');
+    this.load.spritesheet('floor', 'assets/floor.png',{ frameWidth: 32, frameHeight: 32 });
+    for (let i = 1; i <= maxLevel; i++) {
+        this.load.image(`map${i}`, `assets/maps/map${i}.png`);
+    }
+    this.load.image('bomb', 'assets/bomb.png');
+    this.load.image('star', 'assets/star.png');
     //this.load.image('platform', 'assets/platform.png');
 }
-
+function handleEndLevel(isWin){
+    if(isWin){
+        
+        addLevel();
+    }
+    else{
+        alert("Game Over");
+        level=1;
+    }
+    game.scene.start();
+    console.log("game",game)
+}
+function addLevel(){
+    level++;
+    if(level>maxLevel){
+        alert("You win!");
+        level=1;
+        //game.scene.stop();
+    }
+    console.log("adding level: " + level);
+}
 function create() {
-    // Crea los objetos del juego
-    this.add.image(400, 300, 'background');
-    const sceneGenerator = new SceneGenerator(this, 'map', 32);
-    sceneGenerator.generate();
-    platforms = this.physics.add.staticGroup();
-    platforms.create(100, 568, 'floor').setScale(1).refreshBody();
-    platforms.create(800, 568, 'floor').setScale(1).refreshBody();
-    platforms.create(400, 808, 'floor').setScale(3).refreshBody();
-
-    player = new Character(this, 100, 450, 'player');
-    player.setBounce(0.2);
-    staticObject = new MovableObject(this,400, 300, 'floor');
-    staticObject.setScale(0.2)
-    this.physics.add.collider(player, staticObject);
-    //this.physics.add.collider(player, platforms);
-    this.physics.add.collider(staticObject, platforms);
-    // this.anims.create({
-    //     key: 'left',
-    //     frames: this.anims.generateFrameNumbers('player', { start: 0, end: 3 }),
-    //     frameRate: 10,
-    //     repeat: -1
-    // });
-
-    // this.anims.create({
-    //     key: 'turn',
-    //     frames: [{ key: 'player', frame: 4 }],
-    //     frameRate: 20
-    // });
-
-    // this.anims.create({
-    //     key: 'right',
-    //     frames: this.anims.generateFrameNumbers('player', { start: 5, end: 8 }),
-    //     frameRate: 10,
-    //     repeat: -1
-    // });
-
-    this.physics.add.collider(player, platforms);
+    // if(ended){
+    //     console.log("Game ended, starting again");
+    //     return;
+    // }
+    const background = this.add.image(400, 300, 'background');
+    background.setScrollFactor(0);
+    this.sceneGenerator = new SceneGenerator(this, 'map'+level, 32, handleEndLevel);
+    const {platforms, collectables, characters,newPlayer} = this.sceneGenerator.generate();
+    player = newPlayer;
 }
 
 function update() {
+    if(ended){
+        return;
+    }
     // Lógica de actualización del juego
-    cursors = this.input.keyboard.createCursorKeys();
+    const cursors = this.input.keyboard.createCursorKeys();
+    const spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    const AKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    const WKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    const DKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+    const SKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    const randomNumber  = Phaser.Math.Between(0, 100);
+    if( randomNumber < 1 ) {
+        //this.sceneGenerator.generateBombs(1);
+    }
+    this.input.keyboard.addKeys('WASD');
 
-    if (cursors.left.isDown) {
-        player.setVelocityX(-160);
-        player.anims.play('left', true);
-    } else if (cursors.right.isDown) {
-        player.setVelocityX(160);
-        player.anims.play('right', true);
+    if (cursors.left.isDown || AKey.isDown ) {
+        player.moveLeft();
+    } else if (cursors.right.isDown || DKey.isDown) {
+        player.moveRight();
     } else {
-        player.setVelocityX(0);
-        player.anims.play('turn');
+        player.stop();
     }
 
-    if (cursors.up.isDown && player.body.touching.down) {
+    if ((WKey.isDown || spacebar.isDown || cursors.up.isDown) && player.body.touching.down ) {
         player.setVelocityY(-330);
     }
 }
+
+// on restart button click, restart the game
+document.getElementById('restart').addEventListener('click', function() {
+    console.log("restart");
+    game.scene.create();
+});
