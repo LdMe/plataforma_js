@@ -44,8 +44,7 @@ function handleEndLevel(isWin){
         addLevel();
     }
     else{
-        alert("Game Over");
-        level=1;
+        
     }
     game.scene.start();
     console.log("game",game)

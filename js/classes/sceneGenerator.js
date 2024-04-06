@@ -21,7 +21,10 @@ class SceneGenerator {
             allowGravity: false,
             immovable: true
         });
-        this.collectables = this.scene.physics.add.group();
+        this.collectables = this.scene.physics.add.group({
+            allowGravity: false,
+            immovable: true
+        });
         this.characters = this.scene.physics.add.group({
             dragX: 100,
             dragY: 0,

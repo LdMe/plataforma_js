@@ -10,7 +10,7 @@ export class Generator extends StaticObject{
         this.parent = parent;
         // call update every second
         this.scene.time.addEvent({
-            delay: 2000,
+            delay: 1000,
             callback: this.update,
             callbackScope: this,
             loop: true
