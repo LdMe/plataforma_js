@@ -26,7 +26,7 @@ export class Generator extends StaticObject{
         if (Phaser.Math.Between(0, 100) < 50) {
             const distanceToPlayer = Phaser.Math.Distance.Between(this.x, this.y, this.parent.player.x, this.parent.player.y);
             console.log("distance to player: " + distanceToPlayer);
-            if (distanceToPlayer < 300) {
+            if (distanceToPlayer < 360) {
                 this.generate();
             }
         }

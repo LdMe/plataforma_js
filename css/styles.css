@@ -1,0 +1,11 @@
+
+canvas {
+    width: 100%;
+}
+
+@media only screen and (orientation: landscape) {
+    canvas {
+        height: 100vh;
+        width: auto;
+    }
+}

@@ -3,8 +3,8 @@ import { Character } from './classes/character.js';
 import { SceneGenerator } from './classes/sceneGenerator.js';
 const config = {
     type: Phaser.AUTO,
-    width: 1000,
-    height: 800,
+    width: 800,
+    height: 600,
     scene: {
         preload: preload,
         create: create,
@@ -25,17 +25,42 @@ let level=1;
 const maxLevel = 2;
 let ended=false;
 
-
+function createControls(game) {
+    // create control buttons for the game
+    const leftButton = game.add.text(game.width - 100, 10, 'Left', { fontSize: '32px', fill: '#fff' });
+    leftButton.setInteractive();
+    leftButton.on('pointerdown', () => {
+        player.moveLeft();
+    });
+    const rightButton = game.add.text(16, 16, 'Right', { fontSize: '32px', fill: '#fff' });
+    rightButton.setInteractive();
+    rightButton.on('pointerdown', () => {
+        player.moveRight();
+    });
+    const upButton = game.add.text(16, 16, 'Up', { fontSize: '32px', fill: '#fff' });
+    upButton.setInteractive();
+    upButton.on('pointerdown', () => {
+        player.jump();
+    });
+    leftButton.setScrollFactor(0);
+    rightButton.setScrollFactor(0);
+    upButton.setScrollFactor(0);
+}
 function preload() {
     // Carga los assets del juego (spritesheets, imágenes, etc.)
     this.load.image('background', 'assets/background.png');
-    this.load.spritesheet('player', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
+    this.load.spritesheet('player', 'assets/dude23.png', { frameWidth: 64, frameHeight: 96 });
+    this.load.spritesheet('enemy', 'assets/dude24.png', { frameWidth: 64, frameHeight: 96 });
     this.load.spritesheet('floor', 'assets/floor.png',{ frameWidth: 32, frameHeight: 32 });
     for (let i = 1; i <= maxLevel; i++) {
         this.load.image(`map${i}`, `assets/maps/map${i}.png`);
     }
-    this.load.image('bomb', 'assets/bomb.png');
-    this.load.image('star', 'assets/star.png');
+    this.load.image('bomb', 'assets/ball.png');
+    this.load.image('copa', 'assets/copa2.png');
+
+    this.load.image('projectile', 'assets/vaso.png');
+    this.load.image('enemy-projectile', 'assets/sobrasada2.png');
+    this.load.image('star', 'assets/bokata2.png');
     //this.load.image('platform', 'assets/platform.png');
 }
 function handleEndLevel(isWin){
@@ -68,12 +93,19 @@ function create() {
     this.sceneGenerator = new SceneGenerator(this, 'map'+level, 32, handleEndLevel);
     const {platforms, collectables, characters,newPlayer} = this.sceneGenerator.generate();
     player = newPlayer;
+    createControls(this);
 }
 
 function update() {
     if(ended){
         return;
     }
+    // update each projectile of sceneGenerator
+    this.sceneGenerator.characters.children.each(
+        (character) => {
+            character.update(this.sceneGenerator);
+        }
+    )
     // Lógica de actualización del juego
     const cursors = this.input.keyboard.createCursorKeys();
     const spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -94,8 +126,10 @@ function update() {
     } else {
         player.stop();
     }
-
-    if ((WKey.isDown || spacebar.isDown || cursors.up.isDown) && player.body.touching.down ) {
+    if(spacebar.isDown) {
+        player.shoot(this.sceneGenerator);
+    }
+    if ((WKey.isDown  || cursors.up.isDown) && player.body.touching.down ) {
         player.setVelocityY(-330);
     }
 }

@@ -6,22 +6,24 @@ export class Player extends Character {
         // add text with score to the scene
         this.scoreText = document.getElementById('score');
         this.lives = 3;
-        // make it keep position in the center on scroll
-        //this.scoreText.setScrollFactor(0);
+        this.reloadTime = 500;
         
     }
 
     moveLeft() {
-        this.body.setVelocityX(-300);
-        this.anims.play('left', true);
+        this.body.setVelocityX(-200);
+        //flip the sprite
+        this.flipX = true;
+        this.anims.play('player-left', true);
     }
     moveRight() {
-        this.body.setVelocityX(300);
-        this.anims.play('right', true);
+        this.body.setVelocityX(200);
+        this.flipX = false;
+        this.anims.play('player-right', true);
     }
     stop() {
         this.body.setVelocityX(0);
-        this.anims.play('turn');
+        this.anims.play('player-idle');
     }
     collect(collectable) {
         this.score += collectable.points;
